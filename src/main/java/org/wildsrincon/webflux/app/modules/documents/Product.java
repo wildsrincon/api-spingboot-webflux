@@ -50,10 +50,10 @@ public class Product {
     public void setPrice(Double price) {
         this.price = price;
     }
-    public Date getDate() {
+    public Date getCreateAt() {
         return date;
     }
-    public void setDate(Date date) {
+    public void setCreateAt(Date date) {
         this.date = date;
     }
 }

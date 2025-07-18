@@ -11,6 +11,8 @@ import org.wildsrincon.webflux.app.modules.DAO.ProductDAO;
 import org.wildsrincon.webflux.app.modules.documents.Product;
 import reactor.core.publisher.Flux;
 
+import java.util.Date;
+
 @SpringBootApplication
 public class ApiSpingbootWebfluxApplication implements CommandLineRunner {
 
@@ -47,7 +49,11 @@ public class ApiSpingbootWebfluxApplication implements CommandLineRunner {
                 new Product("Auriculares Sony",149.99),
                 new Product("Teclado Mecánico Corsair",129.99)
         )
-                .flatMap(product ->  productDAO.save(product))
+                .flatMap(product ->  {
+                    // Set the date to the current time
+                    product.setCreateAt(new Date());
+                    return productDAO.save(product);
+                })
                 .subscribe(product -> log.info("{} - {} - {}", product.getId(), product.getName(), product.getPrice()));
 
     }
