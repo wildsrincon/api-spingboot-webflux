@@ -54,5 +54,22 @@ public class ProductController {
 
         return "products"; // This should match the name of your Thymeleaf template
     }
+
+    // Get all products full mode backpressure technique
+    @GetMapping("/products-full")
+    public String getAllProductsFull(Model model) {
+        Flux<Product> products = productDAO.findAll()
+                .map(product -> {
+                    product.setName(product.getName().toUpperCase());
+                    return product;
+                })
+                .repeat(5000);
+
+        products.subscribe(prod -> log.info("Product Upper: {}", prod.getName()));
+        model.addAttribute("products", products);
+        model.addAttribute("title", "Products List");
+
+        return "products"; // This should match the name of your Thymeleaf template
+    }
 }
 
