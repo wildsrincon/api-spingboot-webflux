@@ -71,5 +71,22 @@ public class ProductController {
 
         return "products"; // This should match the name of your Thymeleaf template
     }
+
+    // Get all products full mode backpressure technique chunked mode
+    @GetMapping("/products-chunked")
+    public String getAllProductsChunked(Model model) {
+        Flux<Product> products = productDAO.findAll()
+                .map(product -> {
+                    product.setName(product.getName().toUpperCase());
+                    return product;
+                })
+                .repeat(5000);
+
+        products.subscribe(prod -> log.info("Product Upper: {}", prod.getName()));
+        model.addAttribute("products", products);
+        model.addAttribute("title", "Products List");
+
+        return "products-chunked"; // This should match the name of your Thymeleaf template
+    }
 }
 
