@@ -6,11 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.thymeleaf.spring6.context.webflux.ReactiveDataDriverContextVariable;
 import org.wildsrincon.webflux.app.model.documents.Product;
 import org.wildsrincon.webflux.app.service.ProductService;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
@@ -25,14 +27,28 @@ public class ProductController {
 
     // Get all products
     @GetMapping({"/products", "/"})
-    public String getAllProducts(Model model) {
+    public Mono<String> getAllProducts(Model model) {
         Flux<Product> products = service.findAll();
 
-        products.subscribe(prod -> log.info("Product Upper: {}", prod.getName()));
         model.addAttribute("products", products);
         model.addAttribute("title", "Products List");
 
-        return "products"; // This should match the name of your Thymeleaf template
+        return Mono.just("products"); // This should match the name of your Thymeleaf template
+    }
+
+    // Create a new product
+    @GetMapping("/form")
+    public Mono<String> createProduct(Model model) {
+        model.addAttribute("product", new Product());
+        model.addAttribute("title", "Form Create Product");
+        return Mono.just("form"); // This should match the name of your Thymeleaf template
+    }
+
+    @PostMapping("/form")
+    public Mono<String> saveProduct(@ModelAttribute Product product) {
+        return service.save(product)
+                .doOnNext(prod -> log.info("Product saved: " + prod.getName() + " with ID: " + prod.getId()))
+                .thenReturn("redirect:/products");
     }
 
     // Get all products with backpressure technique
