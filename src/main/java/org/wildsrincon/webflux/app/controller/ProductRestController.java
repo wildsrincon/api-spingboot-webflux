@@ -1,4 +1,4 @@
-package org.wildsrincon.webflux.app.controllers;
+package org.wildsrincon.webflux.app.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.wildsrincon.webflux.app.modules.DAO.ProductDAO;
-import org.wildsrincon.webflux.app.modules.documents.Product;
+import org.wildsrincon.webflux.app.repository.ProductDAO;
+import org.wildsrincon.webflux.app.model.documents.Product;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

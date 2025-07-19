@@ -7,8 +7,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
-import org.wildsrincon.webflux.app.modules.DAO.ProductDAO;
-import org.wildsrincon.webflux.app.modules.documents.Product;
+import org.wildsrincon.webflux.app.repository.ProductDAO;
+import org.wildsrincon.webflux.app.model.documents.Product;
 import reactor.core.publisher.Flux;
 
 import java.util.Date;
