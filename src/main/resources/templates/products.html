@@ -16,6 +16,7 @@
         <th>Price</th>
         <th>Description</th>
         <th>Create At</th>
+        <th>Editar</th>
     </tr>
     </thead>
     <tbody>
@@ -25,6 +26,9 @@
         <td th:text="${product.description}"></td>
         <td th:text="${product.price}"></td>
         <td th:text="${product.createAt}"></td>
+        <td>
+            <a th:href="@{/form/{id}(id=${product.id})}">Edit</a>
+        </td>
     </tr>
     </tbody>
 </table>

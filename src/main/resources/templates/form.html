@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!--suppress ALL -->
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -27,6 +28,7 @@
 </div>
 
 <form th:action="@{/form}" method="post" th:object="${product}">
+    <!-- <input th:if="${product.id != null}" type="hidden" th:field="*{id}" /> -->
 
    <div class="form-group">
         <label for="name">Name:</label>
@@ -37,8 +39,7 @@
 
     <div class="form-group">
         <label for="description">Description:</label>
-        <input type="text" th:field="*{description}" id="description" required
-               placeholder="Enter product description">
+        <input type="text" th:field="*{description}" id="description" required placeholder="Enter product description">
         <div class="error" th:if="${#fields.hasErrors('description')}" th:errors="${description}"></div>
     </div>
 

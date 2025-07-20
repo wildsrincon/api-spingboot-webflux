@@ -5,9 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.support.SessionStatus;
 import org.thymeleaf.spring6.context.webflux.ReactiveDataDriverContextVariable;
 import org.wildsrincon.webflux.app.model.documents.Product;
 import org.wildsrincon.webflux.app.service.ProductService;
@@ -16,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
+@SessionAttributes("product")
 @Controller
 public class ProductController {
     @Autowired
@@ -44,8 +44,22 @@ public class ProductController {
         return Mono.just("form"); // This should match the name of your Thymeleaf template
     }
 
+    // Edit an existing product
+    @GetMapping("/form/{id}")
+    public Mono<String> updateProduct(@PathVariable String id, Model model) {
+        Mono<Product> productMono = service.findById(id).doOnNext(prod -> {
+            log.info("Product found: {} with ID: {}", prod.getName(), prod.getId());
+        }).defaultIfEmpty(new Product());
+
+        model.addAttribute("title", "Form Edit Product");
+        model.addAttribute("product", productMono);
+
+        return Mono.just("form");
+    }
+
     @PostMapping("/form")
-    public Mono<String> saveProduct(@ModelAttribute Product product) {
+    public Mono<String> saveProduct(@ModelAttribute Product product, SessionStatus status) {
+        status.setComplete();
         return service.save(product)
                 .doOnNext(prod -> log.info("Product saved: " + prod.getName() + " with ID: " + prod.getId()))
                 .thenReturn("redirect:/products");
