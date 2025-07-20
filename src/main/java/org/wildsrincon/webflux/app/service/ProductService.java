@@ -1,5 +1,6 @@
 package org.wildsrincon.webflux.app.service;
 
+import org.wildsrincon.webflux.app.model.documents.Category;
 import org.wildsrincon.webflux.app.model.documents.Product;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,4 +34,14 @@ public interface ProductService {
 
     // Delete Product
    Mono<Void> delete(Product product);
+
+    // Retrieves all categories
+    Flux<Category> findAllCategories();
+
+    // Retrieves a category by its ID
+    Mono<Category> findCategoryById(String id);
+
+    // Saves a new category
+    Mono<Category> saveCategory(Category category);
+
 }

@@ -25,6 +25,8 @@ public class Product {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date createAt;
 
+    private Category category;
+
     // Default constructor
     public Product() {
     }
@@ -34,6 +36,11 @@ public class Product {
         this.name = name;
         this.description = description;
         this.price = price;
+    }
+
+    public Product(String name, String description, Double price, Category category) {
+        this(name, description, price);
+        this.category = category;
     }
 
     // Getters and Setters
@@ -63,5 +70,13 @@ public class Product {
         return createAt;
     }
     public void setCreateAt(Date createAt) { this.createAt = createAt; }
+
+    // Getter and Setter for Category
+    public Category getCategory() {
+        return category;
+    }
+    public void setCategory(Category category) {
+        this.category = category;
+    }
 }
 

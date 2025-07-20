@@ -2,7 +2,9 @@ package org.wildsrincon.webflux.app.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.wildsrincon.webflux.app.model.documents.Category;
 import org.wildsrincon.webflux.app.model.documents.Product;
+import org.wildsrincon.webflux.app.repository.CategoryDAO;
 import org.wildsrincon.webflux.app.repository.ProductDAO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -13,6 +15,9 @@ public class ProductServiceImpl implements ProductService {
     // Inject the ProductDAO or repository here if needed
     @Autowired
     private ProductDAO productDAO;
+
+    @Autowired
+    private CategoryDAO categoryDAO;
 
     // Implement the methods from ProductService interface
     @Override
@@ -60,7 +65,21 @@ public class ProductServiceImpl implements ProductService {
         return productDAO.delete(product);
     }
 
-    // Define methods for product service here
+    // Implement the methods from Category interface
+    @Override
+    public Flux<Category> findAllCategories() {
+        return categoryDAO.findAll();
+    }
+
+    @Override
+    public Mono<Category> findCategoryById(String id) {
+        return categoryDAO.findById(id);
+    }
+
+    @Override
+    public Mono<Category> saveCategory(Category category) {
+        return categoryDAO.save(category);
+    }
 
 
 }
