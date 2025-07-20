@@ -1,10 +1,12 @@
 package org.wildsrincon.webflux.app.controller;
 
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 import org.thymeleaf.spring6.context.webflux.ReactiveDataDriverContextVariable;
@@ -52,17 +54,45 @@ public class ProductController {
         }).defaultIfEmpty(new Product());
 
         model.addAttribute("title", "Form Edit Product");
+        model.addAttribute("button", "Edit");
         model.addAttribute("product", productMono);
 
         return Mono.just("form");
     }
 
     @PostMapping("/form")
-    public Mono<String> saveProduct(@ModelAttribute Product product, SessionStatus status) {
-        status.setComplete();
-        return service.save(product)
-                .doOnNext(prod -> log.info("Product saved: " + prod.getName() + " with ID: " + prod.getId()))
+    public Mono<String> saveProduct(@ModelAttribute @Valid Product product, BindingResult result, Model model,  SessionStatus status) {
+
+        if (result.hasErrors()) {
+            model.addAttribute("title", "Errors In Form Create Product");
+            model.addAttribute("button", "Save");
+            return Mono.just("form");
+        } else {
+            status.setComplete();
+            if (product.getCreateAt() == null) {
+                product.setCreateAt(new java.util.Date());
+            }
+            return service.save(product)
+                .doOnNext(prod -> log.info("Product saved: {} with ID: {}", prod.getName(), prod.getId()))
                 .thenReturn("redirect:/products");
+        }
+    }
+
+    // Delete a product
+    @GetMapping("/delete/{id}")
+    public Mono<String> deleteProduct(@PathVariable String id) {
+        return service.findById(id)
+            .defaultIfEmpty(new Product())
+            .flatMap(product -> {
+                if (product.getId() == null) {
+                    return Mono.error(new InterruptedException("Product not found"));
+                }
+                return Mono.just(product);
+            })
+            .flatMap(product -> {
+                log.info("Product to delete: {} with ID: {}", product.getName(), product.getId());
+                return service.delete(product);
+            }).thenReturn("redirect:/products");
     }
 
     // Get all products with backpressure technique

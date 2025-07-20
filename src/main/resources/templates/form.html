@@ -53,7 +53,6 @@
     <div class="form-group">
         <label for="createAt">Created At:</label>
         <input type="date" th:field="*{createAt}" id="createAt" required>
-        <div class="error" th:if="${#fields.hasErrors('createAt')}" th:errors="${createAt}"></div>
     </div>
 
     <button type="submit">

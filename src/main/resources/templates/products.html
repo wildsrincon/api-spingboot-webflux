@@ -16,7 +16,8 @@
         <th>Price</th>
         <th>Description</th>
         <th>Create At</th>
-        <th>Editar</th>
+        <th>Edit Product</th>
+        <th>Delete Product</th>
     </tr>
     </thead>
     <tbody>
@@ -28,6 +29,9 @@
         <td th:text="${product.createAt}"></td>
         <td>
             <a th:href="@{/form/{id}(id=${product.id})}">Edit</a>
+        </td>
+        <td>
+            <a th:href="@{/delete/{id}(id=${product.id})}" onclick="return confirm('Are you sure you want to delete the product?');">Delete</a>
         </td>
     </tr>
     </tbody>

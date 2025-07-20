@@ -31,8 +31,6 @@ public interface ProductService {
     // Updates an existing product by ID
     Mono<Product> update(Product product);
 
-    // Delete and existing product by ID
-    Mono<Void> deleteById(String id);
-
-
+    // Delete Product
+   Mono<Void> delete(Product product);
 }

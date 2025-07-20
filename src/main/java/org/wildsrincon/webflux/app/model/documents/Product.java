@@ -1,9 +1,10 @@
 package org.wildsrincon.webflux.app.model.documents;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.NumberFormat;
 
 import java.util.Date;
 
@@ -12,8 +13,13 @@ public class Product {
     @Id
     private String id;
 
+    @NotEmpty
     private String name;
+
+    @NotEmpty
     private String description;
+
+    @NotNull
     private Double price;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
