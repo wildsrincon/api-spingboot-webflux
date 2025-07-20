@@ -2,6 +2,8 @@ package org.wildsrincon.webflux.app.model.documents;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.NumberFormat;
 
 import java.util.Date;
 
@@ -13,15 +15,18 @@ public class Product {
     private String name;
     private String description;
     private Double price;
-    private Date date;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date createAt;
 
     // Default constructor
     public Product() {
     }
 
     // Constructors
-    public Product(String name, Double price) {
+    public Product(String name, String description, Double price) {
         this.name = name;
+        this.description = description;
         this.price = price;
     }
 
@@ -41,9 +46,7 @@ public class Product {
     public String getDescription() {
         return description;
     }
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public void setDescription(String description) { this.description = description; }
     public Double getPrice() {
         return price;
     }
@@ -51,10 +54,8 @@ public class Product {
         this.price = price;
     }
     public Date getCreateAt() {
-        return date;
+        return createAt;
     }
-    public void setCreateAt(Date date) {
-        this.date = date;
-    }
+    public void setCreateAt(Date createAt) { this.createAt = createAt; }
 }
 

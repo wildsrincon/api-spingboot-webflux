@@ -40,21 +40,21 @@ public class ApiSpingbootWebfluxApplication implements CommandLineRunner {
         mongoTemplate.dropCollection("products").subscribe();
 
         Flux.just(
-                new Product("Tv Samsung", 499.99),
-                new Product("Laptop Dell", 899.99),
-                new Product("Smartphone Xiaomi",  299.99),
-                new Product("Tablet Apple", 399.99),
-                new Product("Smartwatch Garmin", 199.99),
-                new Product("Monitor LG", 249.99),
-                new Product("Auriculares Sony",149.99),
-                new Product("Teclado Mecánico Corsair",129.99)
+                new Product("Tv Samsung", "Televisor 4K UHD", 499.99),
+                new Product("Laptop Dell", "Portátil con 16GB RAM", 899.99),
+                new Product("Smartphone Xiaomi", "Teléfono con cámara de 108MP", 299.99),
+                new Product("Tablet Apple", "iPad Pro con M1", 1099.99),
+                new Product("Smartwatch Garmin", "Reloj inteligente con GPS", 349.99),
+                new Product("Monitor LG", "Pantalla 27 pulgadas 4K", 399.99),
+                new Product("Auriculares Sony", "Auriculares inalámbricos con cancelación de ruido", 199.99),
+                new Product("Teclado Mecánico Corsair", "Teclado mecánico retroiluminado", 129.99)
         )
                 .flatMap(product ->  {
                     // Set the date to the current time
                     product.setCreateAt(new Date());
                     return productDAO.save(product);
                 })
-                .subscribe(product -> log.info("{} - {} - {}", product.getId(), product.getName(), product.getPrice()));
+                .subscribe(product -> log.info("{} - {} - {} - {}", product.getId(), product.getName(), product.getDescription(), product.getPrice()));
 
     }
 }
