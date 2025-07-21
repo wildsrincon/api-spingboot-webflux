@@ -30,6 +30,8 @@ public class Product {
     @Valid
     private Category category;
 
+    private String image;
+
     // Default constructor
     public Product() {
     }
@@ -73,6 +75,12 @@ public class Product {
         return createAt;
     }
     public void setCreateAt(Date createAt) { this.createAt = createAt; }
+    public String getImage() {
+        return image;
+    }
+    public void setImage(String image) {
+        this.image = image;
+    }
 
     // Getter and Setter for Category
     public Category getCategory() {
@@ -81,5 +89,6 @@ public class Product {
     public void setCategory(Category category) {
         this.category = category;
     }
+
 }
 

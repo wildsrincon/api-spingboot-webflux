@@ -27,8 +27,9 @@
     <p th:text="${error}"></p>
 </div>
 
-<form th:action="@{/form}" method="post" th:object="${product}">
-    <!-- <input th:if="${product.id != null}" type="hidden" th:field="*{id}" /> -->
+<form th:action="@{/form}" method="post" th:object="${product}" enctype="multipart/form-data">
+    <input th:if="${product.id != null}" type="hidden" th:field="*{id}" />
+    <input th:if="${product.image != null}" type="hidden" th:field="*{image}" />
 
    <div class="form-group">
         <label for="name">Name:</label>
@@ -69,6 +70,11 @@
             </option>
         </select>
         <div class="error" th:if="${#fields.hasErrors('category.id')}" th:errors="*{category.id}"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="file">Image Product:</label>
+        <input type="file" name="file">
     </div>
 
     <button type="submit">

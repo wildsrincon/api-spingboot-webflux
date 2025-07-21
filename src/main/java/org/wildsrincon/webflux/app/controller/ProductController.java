@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,13 +18,20 @@ import org.wildsrincon.webflux.app.service.ProductService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.UUID;
 
 @SessionAttributes("product")
 @Controller
 public class ProductController {
     @Autowired
     private ProductService service;
+
+    @Value("${config.uploads.path}")
+    private String pathUploads;
 
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);
 
@@ -33,6 +42,35 @@ public class ProductController {
 
     // Add methods to handle product-related requests here
     // For example, you can add methods to get products, create a new product, etc.
+
+    // Crear directorio de uploads si no existe
+    private void createUploadsDirectoryIfNotExists() {
+        File uploadsDir = new File(pathUploads);
+        if (!uploadsDir.exists()) {
+            boolean created = uploadsDir.mkdirs();
+            if (created) {
+                log.info("Directorio de uploads creado: {}", uploadsDir.getAbsolutePath());
+            } else {
+                log.error("No se pudo crear el directorio: {}", uploadsDir.getAbsolutePath());
+            }
+        }
+    }
+
+    private String generateUniqueFileName(String originalFilename) {
+        if (originalFilename == null || originalFilename.isEmpty()) {
+            return UUID.randomUUID().toString() + ".jpg";
+        }
+
+        String cleanFilename = originalFilename.replaceAll("[^a-zA-Z0-9\\.\\-_]", "");
+        String extension = "";
+        int dotIndex = cleanFilename.lastIndexOf('.');
+        if (dotIndex > 0) {
+            extension = cleanFilename.substring(dotIndex);
+            cleanFilename = cleanFilename.substring(0, dotIndex);
+        }
+
+        return UUID.randomUUID().toString() + "-" + cleanFilename + extension;
+    }
 
     // Get all products
     @GetMapping({"/products", "/"})
@@ -68,28 +106,80 @@ public class ProductController {
     }
 
     @PostMapping("/form")
-    public Mono<String> saveProduct(@ModelAttribute @Valid Product product, BindingResult result, Model model,  SessionStatus status) {
+    public Mono<String> saveProduct(@ModelAttribute @Valid Product product,
+                                    BindingResult result,
+                                    Model model,
+                                    @RequestPart(required = false) FilePart file,
+                                    SessionStatus status) {
 
+        // Validar errores de formulario
         if (result.hasErrors()) {
             model.addAttribute("title", "Errors In Form Create Product");
             model.addAttribute("button", "Save");
             return Mono.just("form");
-        } else {
-            status.setComplete();
-
-            Mono<Category> categoryMono = service.findCategoryById(product.getCategory().getId());
-            return categoryMono.flatMap(category -> {
-                if (product.getCreateAt() == null) {
-                    product.setCreateAt(new java.util.Date());
-                }
-                product.setCategory(category);
-                return service.saveProduct(product);
-            }).doOnNext(prod -> {
-                    log.info("Category assigned: {} with ID: {}", prod.getCategory().getName(), prod.getCategory().getId());
-                    log.info("Product saved: {} with ID: {}", prod.getName(), prod.getId());
-            }).thenReturn("redirect:/products");
         }
+
+        // Validar que se haya seleccionado una categoría
+        if (product.getCategory() == null || product.getCategory().getId() == null ||
+                product.getCategory().getId().trim().isEmpty()) {
+            result.rejectValue("category", "category.required", "Debe seleccionar una categoría");
+            model.addAttribute("title", "Errors In Form Create Product");
+            model.addAttribute("button", "Save");
+            return Mono.just("form");
+        }
+
+        status.setComplete();
+
+        return service.findCategoryById(product.getCategory().getId())
+                .flatMap(category -> {
+                    // Establecer fecha si es null
+                    if (product.getCreateAt() == null) {
+                        product.setCreateAt(new java.util.Date());
+                    }
+
+                    product.setCategory(category);
+
+                    // Procesar archivo si existe
+                    if (file != null && !file.filename().isEmpty()) {
+                        String uniqueFilename = generateUniqueFileName(file.filename());
+                        product.setImage(uniqueFilename);
+                        log.info("Archivo a guardar: {}", uniqueFilename);
+                    }
+
+                    return service.saveProduct(product);
+                })
+                .flatMap(savedProduct -> {
+                    log.info("Product saved: {} with ID: {}", savedProduct.getName(), savedProduct.getId());
+
+                    // Guardar archivo físicamente si existe
+                    if (file != null && !file.filename().isEmpty() && savedProduct.getImage() != null) {
+                        return saveFileToFileSystem(file, savedProduct.getImage())
+                                .thenReturn(savedProduct);
+                    }
+                    return Mono.just(savedProduct);
+                })
+                .doOnSuccess(p -> log.info("Proceso completado para producto: {}", p.getName()))
+                .doOnError(error -> log.error("Error guardando producto: ", error))
+                .thenReturn("redirect:/products")
+                .onErrorReturn("form");
     }
+
+    private Mono<Void> saveFileToFileSystem(FilePart filePart, String filename) {
+        // Crear directorio si no existe
+        createUploadsDirectoryIfNotExists();
+
+        // Crear ruta completa del archivo
+        Path filePath = Paths.get(pathUploads).resolve(filename);
+        File destFile = filePath.toFile();
+
+        log.info("Guardando archivo en: {}", destFile.getAbsolutePath());
+
+        return filePart.transferTo(destFile)
+                .doOnSuccess(v -> log.info("Archivo guardado exitosamente: {}", destFile.getAbsolutePath()))
+                .doOnError(error -> log.error("Error guardando archivo: ", error));
+    }
+
+
 
     // Delete a product
     @GetMapping("/delete/{id}")
