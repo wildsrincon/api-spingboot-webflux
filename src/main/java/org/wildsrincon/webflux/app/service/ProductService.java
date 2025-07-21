@@ -27,7 +27,7 @@ public interface ProductService {
     Mono<Product> findById(String id);
 
     // Saves a new product
-    Mono<Product> save(Product product);
+    Mono<Product> saveProduct(Product product);
 
     // Updates an existing product by ID
     Mono<Product> update(Product product);

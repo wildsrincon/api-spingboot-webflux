@@ -10,6 +10,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 import org.thymeleaf.spring6.context.webflux.ReactiveDataDriverContextVariable;
+import org.wildsrincon.webflux.app.model.documents.Category;
 import org.wildsrincon.webflux.app.model.documents.Product;
 import org.wildsrincon.webflux.app.service.ProductService;
 import reactor.core.publisher.Flux;
@@ -24,6 +25,12 @@ public class ProductController {
     private ProductService service;
 
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);
+
+    @ModelAttribute("categories")
+    public Flux<Category> categories() {
+        return service.findAllCategories();
+    } ;
+
     // Add methods to handle product-related requests here
     // For example, you can add methods to get products, create a new product, etc.
 
@@ -72,7 +79,7 @@ public class ProductController {
             if (product.getCreateAt() == null) {
                 product.setCreateAt(new java.util.Date());
             }
-            return service.save(product)
+            return service.saveProduct(product)
                 .doOnNext(prod -> log.info("Product saved: {} with ID: {}", prod.getName(), prod.getId()))
                 .thenReturn("redirect:/products");
         }

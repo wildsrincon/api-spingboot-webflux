@@ -55,6 +55,15 @@
         <input type="date" th:field="*{createAt}" id="createAt" required>
     </div>
 
+    <div class="form-group">
+        <label for="category.id">Category:</label>
+        <select th:field="*{category.id}">
+            <option value="">-- Select Category --</option>
+            <option th:each="category: ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+        </select>
+        <div class="error" th:if="${#fields.hasErrors('category.id')}" th:errors="${category.id}"></div>
+    </div>
+
     <button type="submit">
         <span th:text="${product.id != null ? 'Update Product' : 'Create Product'}">Submit</span>
     </button>

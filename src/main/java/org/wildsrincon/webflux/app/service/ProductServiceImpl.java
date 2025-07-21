@@ -45,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Mono<Product> save(Product product) {
+    public Mono<Product> saveProduct(Product product) {
         return productDAO.save(product);
     }
 
