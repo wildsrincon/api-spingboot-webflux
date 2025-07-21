@@ -76,12 +76,18 @@ public class ProductController {
             return Mono.just("form");
         } else {
             status.setComplete();
-            if (product.getCreateAt() == null) {
-                product.setCreateAt(new java.util.Date());
-            }
-            return service.saveProduct(product)
-                .doOnNext(prod -> log.info("Product saved: {} with ID: {}", prod.getName(), prod.getId()))
-                .thenReturn("redirect:/products");
+
+            Mono<Category> categoryMono = service.findCategoryById(product.getCategory().getId());
+            return categoryMono.flatMap(category -> {
+                if (product.getCreateAt() == null) {
+                    product.setCreateAt(new java.util.Date());
+                }
+                product.setCategory(category);
+                return service.saveProduct(product);
+            }).doOnNext(prod -> {
+                    log.info("Category assigned: {} with ID: {}", prod.getCategory().getName(), prod.getCategory().getId());
+                    log.info("Product saved: {} with ID: {}", prod.getName(), prod.getId());
+            }).thenReturn("redirect:/products");
         }
     }
 

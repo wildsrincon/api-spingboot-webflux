@@ -57,11 +57,18 @@
 
     <div class="form-group">
         <label for="category.id">Category:</label>
-        <select th:field="*{category.id}">
+        <select th:field="*{category.id}"
+                id="category"
+                th:class="${#fields.hasErrors('category.id')} ? 'field-error' : ''"
+                required>
             <option value="">-- Select Category --</option>
-            <option th:each="category: ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+            <option th:each="category : ${categories}"
+                    th:value="${category.id}"
+                    th:text="${category.name}"
+                    th:selected="${product.category != null and product.category.id == category.id}">
+            </option>
         </select>
-        <div class="error" th:if="${#fields.hasErrors('category.id')}" th:errors="${category.id}"></div>
+        <div class="error" th:if="${#fields.hasErrors('category.id')}" th:errors="*{category.id}"></div>
     </div>
 
     <button type="submit">

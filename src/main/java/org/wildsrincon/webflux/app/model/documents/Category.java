@@ -1,11 +1,13 @@
 package org.wildsrincon.webflux.app.model.documents;
 
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document( collection = "categories")
 public class Category {
     @Id
+    @NotEmpty
     private String id;
 
     private String name;
