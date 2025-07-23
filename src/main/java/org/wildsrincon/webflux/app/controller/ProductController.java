@@ -5,6 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +23,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -70,6 +75,33 @@ public class ProductController {
         }
 
         return UUID.randomUUID().toString() + "-" + cleanFilename + extension;
+    }
+
+    // View image of a product
+    @GetMapping("/uploads/img/{filename:.+}")
+    public Mono<ResponseEntity<Resource>> viewImage(@PathVariable String filename, Model model) throws MalformedURLException {
+        Path filePath = Paths.get(pathUploads).resolve(filename).toAbsolutePath();
+
+        Resource image = new UrlResource(filePath.toUri());
+
+        return Mono.just(ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + image.getFilename() + "\"")
+                .body(image))
+                .doOnSuccess(response -> log.info("Image served: {}", filename))
+                .doOnError(error -> log.error("Error serving image: ", error));
+    }
+
+    // View product details
+    @GetMapping("/product-detail/{id}")
+    public Mono<String> viewProductDetail(@PathVariable String id, Model model) {
+        Mono<Product> productMono = service.findById(id)
+                .doOnNext(prod -> log.info("Product found: {} with ID: {}", prod.getName(), prod.getId()))
+                .switchIfEmpty(Mono.error(new InterruptedException("Product not found")));
+
+        model.addAttribute("product", productMono);
+        model.addAttribute("title", "Product Detail");
+
+        return Mono.just("product-detail"); // This should match the name of your Thymeleaf template
     }
 
     // Get all products
